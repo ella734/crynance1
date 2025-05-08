@@ -1,74 +1,89 @@
-* {
+ *{
+
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  body {
+    background: #0e112a; /* même fond que mainpage */
+    color: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-}
-
-.login-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-}
-
-h1 {
+  }
+  
+  .form-container {
+    background-color: #1c1f4a; /* bleu foncé cohérent */
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+    width: 90%;
+    max-width: 500px;
     text-align: center;
+  }
+  
+  h1 {
     margin-bottom: 20px;
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input {
+    color: #4a90e2;
+    font-size: 28px;
+  }
+  
+  input {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007BFF;
-    color: white;
+    padding: 12px;
+    margin: 12px 0;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
+    background-color: #2b2e5e;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  input::placeholder {
+    color: #ccc;
+  }
+  
+  button {
+    width: 100%;
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 10px;
     cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.error {
-    color: red;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-a {
-    color: #007BFF;
-    text-decoration: none;
-}
-
-a:hover {
+    margin-top: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #357ABD;
+  }
+  
+  .error-message {
+    color: #ff4c4c;
+    margin: 10px 0;
+    font-weight: bold;
+  }
+  
+  .success-message {
+    color: #00c46b;
+    margin: 10px 0;
+    font-weight: bold;
+  }
+  
+  .toggle-link {
+    color: #4a90e2;
+    cursor: pointer;
     text-decoration: underline;
-}
+    margin-top: 18px;
+    display: inline-block;
+    font-size: 0.95rem;
+  }
+  
+  .hidden {
+    display: none;
+  }
