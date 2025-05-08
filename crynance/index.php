@@ -1,176 +1,110 @@
 <?php
 session_start();
-
-// Connexion à la base de données
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=crypto_users;charset=utf8", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erreur de connexion à la base de données : " . $e->getMessage());
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
 }
-
-$erreur = '';
-$succes = '';
-
-// Connexion
-if (isset($_POST['action']) && $_POST['action'] === 'login') {
-    $email = $_POST['email'] ?? '';
-    $motdepasse = $_POST['motdepasse'] ?? '';
-
-    $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch();
-
-    if ($user && password_verify($motdepasse, $user['motdepasse'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['prenom'] = $user['prenom'];
-        $_SESSION['nom'] = $user['nom'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['role'] = $user['role'] ?? 'user';
-
-        // Redirection selon le rôle
-        if ($_SESSION['role'] === 'admin' || $_SESSION['email'] === 'admin@admin.com') {
-            header("Location: admin.php");
-        } else {
-            header("Location: mainpage.php");
-        }
-        exit();
-    } else {
-        $erreur = "Email ou mot de passe incorrect.";
-    }
-}
-
-// Inscription
-if (isset($_POST['action']) && $_POST['action'] === 'signup') {
-    $nom = $_POST['nom'] ?? '';
-    $prenom = $_POST['prenom'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $motdepasse = $_POST['motdepasse'] ?? '';
-
-    $stmt = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = ?");
-    $stmt->execute([$email]);
-
-    if ($stmt->fetch()) {
-        $erreur = "Email déjà utilisé.";
-    } else {
-        $hash = password_hash($motdepasse, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare("INSERT INTO utilisateurs (nom, prenom, email, motdepasse) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$nom, $prenom, $email, $hash])) {
-            $succes = "Compte créé avec succès. Connectez-vous.";
-        } else {
-            $erreur = "Erreur lors de l'inscription.";
-        }
-    }
-}
+$prenom = $_SESSION['prenom'] ?? '';
+$nom = $_SESSION['nom'] ?? '';
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Crynance – Connexion / Inscription</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body {
-      background: #e7e7e7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .form-container {
-      background-color: #fff;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.15);
-      width: 100%;
-      max-width: 500px;
-      text-align: center;
-    }
-    h1 { margin-bottom: 20px; color: #007BFF; }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    button {
-      width: 100%;
-      background: #007BFF;
-      color: #fff;
-      border: none;
-      padding: 14px;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover { background-color: #0056b3; }
-    .error-message { color: red; margin: 10px 0; }
-    .success-message { color: green; margin: 10px 0; }
-    .toggle-link {
-      color: #007BFF;
-      cursor: pointer;
-      text-decoration: underline;
-      margin-top: 15px;
-      display: inline-block;
-    }
-    .hidden { display: none; }
-  </style>
+  <title>Crynance</title>
+  <link rel="stylesheet" href="mainpage.css">
 </head>
 <body>
+  <header>
+    <nav>
+      <div class="logo">crynance</div>
+      <ul>
+        <li><a href="markets.php">Marchés</a></li>
+        <li><a href="education.php">Éducation</a></li>
+        <li><a href="logout.php">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <div class="form-container">
-    <h1 id="form-title">Connexion</h1>
+  <section class="hero">
+    <h1>Bienvenue <b><?= htmlspecialchars($prenom . ' ' . $nom) ?></b> 👋</h1>
+    <p>Tradez <u>Bitcoin</u>, <u>Ethereum</u>, et bien plus.</p>
+    <a href="#crypto-table" class="btn">Commencer</a>
+  </section>
 
-    <?php if ($erreur): ?>
-      <p class="error-message"><?= htmlspecialchars($erreur) ?></p>
-    <?php elseif ($succes): ?>
-      <p class="success-message"><?= htmlspecialchars($succes) ?></p>
-    <?php endif; ?>
+  <section class="crypto-table" id="crypto-table">
+    <h2>Prix du marché</h2>
+    <article>
+      <p>Voici les prix actuels des cryptomonnaies les plus populaires :</p>
+    </article>
 
-    <!-- FORMULAIRE CONNEXION -->
-    <form method="POST" id="login-form">
-      <input type="hidden" name="action" value="login">
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="password" name="motdepasse" placeholder="Mot de passe" required>
-      <button type="submit">Se connecter</button>
-    </form>
+    <aside>
+      <p>Note : les prix peuvent varier rapidement.</p>
+    </aside>
 
-    <!-- FORMULAIRE INSCRIPTION -->
-    <form method="POST" id="signup-form" class="hidden">
-      <input type="hidden" name="action" value="signup">
-      <input type="text" name="nom" placeholder="Nom" required>
-      <input type="text" name="prenom" placeholder="Prénom" required>
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="password" name="motdepasse" placeholder="Mot de passe" required>
-      <button type="submit">Créer un compte</button>
-    </form>
+    <figure>
+      <img src="cripto.jpg" alt="Marché des cryptomonnaies" width="600" height="400">
+      <figcaption>Tendances actuelles du marché.</figcaption>
+    </figure>
 
-    <p class="toggle-link" onclick="toggleForms()">Pas encore inscrit ? Créer un compte</p>
-  </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Cryptomonnaie</th>
+          <th>Prix (USD)</th>
+          <th>Évolution 24h</th>
+          <th>Capitalisation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bitcoin (BTC)</td>
+          <td>$50,000</td>
+          <td class="positive">+2.5%</td>
+          <td>$950B</td>
+        </tr>
+        <tr>
+          <td>Ethereum (ETH)</td>
+          <td>$3,400</td>
+          <td class="negative">-1.2%</td>
+          <td>$400B</td>
+        </tr>
+        <tr>
+          <td>Binance Coin (BNB)</td>
+          <td>$550</td>
+          <td class="positive">+3.8%</td>
+          <td>$90B</td>
+        </tr>
+        <tr>
+          <td>Solana (SOL)</td>
+          <td>$120</td>
+          <td class="negative">-0.5%</td>
+          <td>$50B</td>
+        </tr>
+      </tbody>
+    </table>
 
+    <p><q>Investissez intelligemment et restez informé !</q> – <b>Équipe Crynance</b></p>
+
+    <fieldset>
+      <legend>Conseils d’investissement</legend>
+      <ul class="advice-list">
+        <li class="advice-item">Diversifiez votre portefeuille.</li>
+        <li class="advice-item">Suivez les tendances du marché.</li>
+        <li class="advice-item">N’investissez que ce que vous êtes prêt à perdre.</li>
+      </ul>
+    </fieldset>
+  </section>
+
+  <footer>
+    <p>© <span id="year"></span> Crynance – Tous droits réservés.</p>
+  </footer>
+
+  <script src="mainpage.js"></script>
   <script>
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
-    const formTitle = document.getElementById('form-title');
-    const toggleLink = document.querySelector('.toggle-link');
-
-    function toggleForms() {
-      loginForm.classList.toggle('hidden');
-      signupForm.classList.toggle('hidden');
-      if (loginForm.classList.contains('hidden')) {
-        formTitle.textContent = 'Inscription';
-        toggleLink.textContent = 'Déjà inscrit ? Se connecter';
-      } else {
-        formTitle.textContent = 'Connexion';
-        toggleLink.textContent = 'Pas encore inscrit ? Créer un compte';
-      }
-    }
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
-
 </body>
 </html>
